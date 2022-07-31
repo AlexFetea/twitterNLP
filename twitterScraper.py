@@ -16,7 +16,7 @@ accessTokenSecret = login['key'][4]
 
 client = tweepy.Client(bearer_token=bearerToken, consumer_key=consumerKey, consumer_secret=consumerSecret, access_token=accessToken, access_token_secret=accessTokenSecret)
 
-tweets = client.search_recent_tweets(query="#covid19 lang:en",  max_results=100)
+tweets = client.search_recent_tweets(query="#covid19 lang:en -is:retweet",  max_results=100)
 
 
 df = pd.DataFrame([tweet.text for tweet in tweets.data], columns=["Tweets"])
@@ -26,9 +26,7 @@ df.head()
 def cleanTxt(text):
 	text = re.sub(r'@\w+','', text)
 	text = re.sub(r'#\w+','', text)
-	text = re.sub(r'RT[\s]+','',text)
 	text = re.sub(r'http\S+','',text)
-
 	return text
 
 df['Tweets'] =  df['Tweets'].apply(cleanTxt)
@@ -44,15 +42,6 @@ def getPolarity(text):
 df['Subjectivity'] = df['Tweets'].apply(getSubjectivity)
 df['Polarity'] = df['Tweets'].apply(getPolarity)
 
-print(df['Subjectivity'])
-print(df['Polarity'])
-
-allWords = ' '.join([tweets for tweets in df['Tweets']])
-wordCloud = WordCloud(width=500, height=300, random_state=21, max_font_size=119).generate(allWords)
-
-plt.imshow(wordCloud, interpolation="bilinear")
-plt.axis('off')
-#plt.show()
 
 def getAnalysis(score):
 	if score < 0:
@@ -64,6 +53,8 @@ def getAnalysis(score):
 
 df['Analysis'] = df['Polarity'].apply(getAnalysis)
 
+print(df['Subjectivity'])
+print(df['Polarity'])
 print(df['Analysis'])
 
 j=1
